@@ -7,30 +7,31 @@
 
 import UIKit
 
-@main
+ @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-
+    
+    // creamos la ventana que es controlador princiopal de nuestra App.
+    var window : UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        
+        //Setup
+        setupView()
         return true
     }
-
-    // MARK: UISceneSession Lifecycle
-
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+    
+//MARK: - Private methods
+    
+    private func setupView(){
+        //instanciamos una UIWindow que tenga la window tamaño completo de la pantalla
+        window = UIWindow(frame: UIScreen.main.bounds)
+        // instanciamos nuestro VC creado
+        let kVc = HomeViewController()
+        // decimos que nuestro controlador de vista principal es nuestro VC creado
+        window?.rootViewController = kVc
+        // decimos a nuestra ventana que se inicie y se muestre visible
+        window?.makeKeyAndVisible()
     }
-
-    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-        // Called when the user discards a scene session.
-        // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
-    }
-
-
 }
 
