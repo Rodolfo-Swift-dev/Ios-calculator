@@ -1,7 +1,7 @@
 //  HomeViewController.swift
 //  Created by rodoolfo gonzalez on 14-02-23.
 import UIKit
- 
+
 // final para tener controlado nuestro scope, evitando que nuestra clase se extienda. asi controlamos la funcionalidad de cada componente.
 final class HomeViewController: UIViewController {
     
@@ -32,17 +32,19 @@ final class HomeViewController: UIViewController {
     
     //MARK: - Variables
     //private ya que el scope de estas variables va a ser solo esta clasi y asi controlamos funcionalidad
- 
+    
     private var total : Double = 0 // valor del total
     private var temp : Double = 0 // valor temporal que se muestra en pantalla
     private var operating = false // indica si se ha seleccionado un operador (+,-,/,x,%)
     private var decimal = false // nos  indica si presionamos el operador decimal, lo que la calculadora comienza a tratar con numeros decimales
     private var activeDecimal = false
     private var operation : OperationType = .none // operacion actual
+    private var indexDecimal = 0
+    
     
     //MARK: - Constantes
     
-   let networking = NetworkingProvider()
+    let networking = NetworkingProvider()
     private let kDecimalSeparator = Locale.current.decimalSeparator! // calcular simbolo decimal entre "." o "," segun nuestro idioma o pais.
     private let kNumMaxDigits = 9 // maxima cantidad de digitos
     private let kMaxNum : Double = 999999999 // numer mas alto permitido
@@ -55,7 +57,6 @@ final class HomeViewController: UIViewController {
     
     
     //MARK: - Formateo de valores auxiliare
-    
     
     private let transformFormatter : NumberFormatter = {
         let formatter = NumberFormatter()
@@ -70,6 +71,7 @@ final class HomeViewController: UIViewController {
         
         return formatter
     }()
+    
     
     // encargado de formatear valores que vamos atrabajar en nuestra App
     private let auxFormatter : NumberFormatter = {
@@ -107,7 +109,7 @@ final class HomeViewController: UIViewController {
         
         formatter.numberStyle = .currency
         return formatter
-    
+        
     }()
     private let printFormatter : NumberFormatter = {
         //creamos formateador de numero
@@ -127,7 +129,7 @@ final class HomeViewController: UIViewController {
         // configuramos el formateador su maxima cantidad de digitos despues de la coma(decimal)
         formatter.maximumFractionDigits = 8
         return formatter
-    
+        
     }()
     
     //implementacion de como queremos instanciar VC
@@ -170,7 +172,7 @@ final class HomeViewController: UIViewController {
         numberDecimal.setTitle(kDecimalSeparator, for: .normal)
         
         result()
-
+        
     }
     
     //MARK: - Action operators Buttons
@@ -178,7 +180,7 @@ final class HomeViewController: UIViewController {
         clear()
         sender.shine()
     }
-   
+    
     @IBAction func operatorDivAction(_ sender: UIButton) {
         if !operating{
             result()
@@ -225,7 +227,7 @@ final class HomeViewController: UIViewController {
         operation = .none
         activeDecimal = false
         sender.shine()
-       
+        
     }
     @IBAction func operatorBitcoinAction(_ sender: UIButton) {
         var currentTemp = ""
@@ -246,7 +248,7 @@ final class HomeViewController: UIViewController {
         } failure: { error in
             print(error?.localizedDescription)
         }
-    
+        activeDecimal = false
         sender.shine()
     }
     
@@ -259,7 +261,6 @@ final class HomeViewController: UIViewController {
         }
         
         resultLabel.text! += kDecimalSeparator
-        
         decimal = true
         activeDecimal = true
         sender.shine()
@@ -267,12 +268,32 @@ final class HomeViewController: UIViewController {
     
     @IBAction func numbersAction(_ sender: UIButton) {
         
+        
+        var transformCurrentTemp = ""
+        var currentTemp = ""
+        if activeDecimal{
+            indexDecimal += 1
+        }
         operatorAC.setTitle("C", for: .normal)
-        var transformTemp = temp
-        var transformCurrentTemp = transformFormatter.string(from: NSNumber(value: temp))!
-        var currentTemp = auxFormatter.string(from: NSNumber(value: temp))!
         
-        
+        if resultLabel.text?.last == "0", activeDecimal, sender.tag != 0{
+            
+            var newText = resultLabel.text!.replacingOccurrences(of: ",", with: ".")
+            newText += sender.tag.description
+            if let convert = Double(newText){
+                temp = convert
+                print("convert\(convert)")
+            }
+     
+            print("temp\(temp)")
+           
+            
+        }else{
+            transformCurrentTemp = transformFormatter.string(from: NSNumber(value: temp))!
+            currentTemp = auxFormatter.string(from: NSNumber(value: temp))!
+        }
+       
+// verificacion de cantidad de digitos, si es decimal, o esta operando
         if  currentTemp.count >= kNumMaxDigits{
             //detener ejecucion funcion actual
             return
@@ -281,9 +302,6 @@ final class HomeViewController: UIViewController {
             currentTemp += "."
             transformCurrentTemp += "."
             decimal = false
-            
-           
-            
         }
         if operating{
             total = total == 0 ? temp : total
@@ -292,58 +310,107 @@ final class HomeViewController: UIViewController {
             operating = false
         }
         
-        
+//Añadimos el numero presionado
         currentTemp += String(sender.tag)
         transformCurrentTemp += String(sender.tag)
-       
+        /* if sender == 0{
+        temp += sender.tag
+         }*/
         
-        
-        if let result = Double( transformCurrentTemp){
-               
-                temp = result
+        if sender.tag == 0, activeDecimal{
+            
+            let decimalFormatter : NumberFormatter = {
+                let formatter = NumberFormatter()
+                let locale = Locale.current
+                formatter.groupingSeparator = ""
+                formatter.decimalSeparator = "."
+                formatter.numberStyle = .decimal
+                formatter.maximumIntegerDigits = 9
+                formatter.minimumFractionDigits = indexDecimal
+                formatter.maximumFractionDigits = 8
+                
+                return formatter
+            }()
+            currentTemp = decimalFormatter.string(from: NSNumber(value: temp))!
            
-        }
-        
-       
-        
-       
-        
-        print(temp)
-        
-        
-       
+                var resulText = resultLabel.text!
+                resulText += "0"
+            
+                self.resultLabel.text! = resulText
+                
+                print("temp \(temp)")
+                print("resultlabel \(resultLabel.text!)")
+                
+            
+            
+        }else if sender.tag != 0, activeDecimal{
+            let decimalFormatter : NumberFormatter = {
+                let formatter = NumberFormatter()
+                let locale = Locale.current
+                formatter.groupingSeparator = ""
+                formatter.decimalSeparator = "."
+                formatter.numberStyle = .decimal
+                formatter.maximumIntegerDigits = 9
+                formatter.minimumFractionDigits = indexDecimal
+                formatter.maximumFractionDigits = 8
+                
+                return formatter
+            }()
+            currentTemp = decimalFormatter.string(from: NSNumber(value: temp))!
+           
+                var resulText = resultLabel.text!
+            resulText += "\(sender.tag)"
+            
+                self.resultLabel.text! = resulText
+                
+                print("temp \(temp)")
+                print("resultlabel \(resultLabel.text!)")
+        }else{
+            if let result = Double( transformCurrentTemp){
+                temp = result
+                print("temp \(temp)")
+            }
             self.resultLabel.text! = self.printFormatter.string(from: NSNumber(value: self.temp))!
-        
+            print("resultlabel \(resultLabel.text!)")
+            
+        }
+       
+     
+      
         
         sender.shine()
-       
+        
     }
     
     // limpia los valores
     private func clear(){
         operation = .none
         
-           
+        
         if operatorAC.titleLabel?.text == "C"{
-                temp = 0
-                resultLabel.text = "0"
-               
-        }else{
-                total = 0
-                temp = 0
+            temp = 0
             resultLabel.text = "0"
-                operation = .none
-                operating = false
-                decimal = false
-                result()
+            
+        }else{
+            total = 0
+            temp = 0
+            resultLabel.text = "0"
+            operation = .none
+            operating = false
+            decimal = false
+            activeDecimal = false
+            result()
         }
         activeDecimal = false
+        indexDecimal += 0
         operatorAC.setTitle("AC", for: .normal)
-     
+        
         
     }
     //obtiene resultado total
     private func result(){
+        activeDecimal = false
+        indexDecimal += 0
         switch operation {
             //los "break" son para detener la ejecucion del switch cuando se du uno de los casos
         case .none:
@@ -361,12 +428,12 @@ final class HomeViewController: UIViewController {
         case .div:
             total /= temp
             break
-    
+            
         }
         //formateo en pantalla
         if (total <= kMaxNum && total >= kMinNum){
             resultLabel.text = printFormatter.string(from: NSNumber(value: total))
         }
-       
+        
     }
 }
