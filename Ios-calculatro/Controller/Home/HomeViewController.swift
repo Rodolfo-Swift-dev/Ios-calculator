@@ -248,6 +248,8 @@ final class HomeViewController: UIViewController {
         } failure: { error in
             print(error?.localizedDescription)
         }
+        operating = false
+        decimal = false
         activeDecimal = false
         sender.shine()
     }
