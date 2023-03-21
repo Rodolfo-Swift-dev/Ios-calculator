@@ -248,8 +248,7 @@ final class HomeViewController: UIViewController {
         } failure: { error in
             print(error?.localizedDescription)
         }
-        operating = false
-        decimal = false
+       
         activeDecimal = false
         sender.shine()
     }
@@ -345,7 +344,7 @@ final class HomeViewController: UIViewController {
                 
             
             
-        }else if sender.tag != 0, activeDecimal{
+        }else if sender.tag != 0, activeDecimal, resultLabel.text!.last == "0"{
             let decimalFormatter : NumberFormatter = {
                 let formatter = NumberFormatter()
                 let locale = Locale.current
@@ -388,8 +387,8 @@ final class HomeViewController: UIViewController {
     private func clear(){
         operation = .none
         
-        
         if operatorAC.titleLabel?.text == "C"{
+            total = 0
             temp = 0
             resultLabel.text = "0"
             
