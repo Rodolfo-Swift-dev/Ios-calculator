@@ -33,7 +33,7 @@ Interfaz adaptada para iPAD y iOS con orientaciones:
 * Es suficiente ejecutar el archivo `Ios-calculatro.xcodeproj` en Xcode.
 * Puedes acceder a su código fuente libremente.
 * Sirve como ejemplo de proyecto real para entender así el ciclo de vida de un producto de software.
- -----------
+-----------
 
 
 ### Sobre Pull Request al proyecto
